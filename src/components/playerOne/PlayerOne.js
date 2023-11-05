@@ -1,6 +1,5 @@
 // Imports
-
-import React from "react";
+import React, { useState } from "react";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import Button from "@mui/material/Button";
@@ -10,7 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Stack from "@mui/material/Stack";
 import "./PlayerOne.css";
-
+import AceValuePrompt from "../aceValuePrompt/AceValuePrompt.js"; // Adjust the path accordingly
 const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
   // STATES:
   const [player1CardObj, setPlayer1CardObj] = React.useState(player1cards);
@@ -18,9 +17,7 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
     React.useState(null);
   const [hitCards, setHitCards] = React.useState(null);
   const [score, setScore] = React.useState(null);
-  console.log(player1CardObj, "player1CardObj");
-  console.log(player1CardFaceValues, "player1CardFaceValues");
-  console.log(score, "score");
+  const [showAcePrompt, setShowAcePrompt] = useState(false);
   // LifeCycle:
   React.useEffect(() => {
     if (player1cards !== null) {
@@ -55,15 +52,8 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
 
     player1CardFaceValues.forEach((element) => {
       if (element === "ACE" && result < 21) {
-        // Prompt the player to decide if the value of "ACE" should be 11 or 1
-        const isAce11 = window.confirm(
-          "Do you want the value of ACE to be 11?"
-        );
-        if (isAce11) {
-          result += 11;
-        } else {
-          result += 1;
-        }
+        // Show AceValuePrompt instead of window.confirm
+        setShowAcePrompt(true);
       } else if (["KING", "QUEEN", "JACK"].includes(element)) {
         result += 10;
       } else {
@@ -108,6 +98,20 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
       progress: undefined,
       theme: "light",
     });
+
+    const handleAceSelection = (isAce11) => {
+      setShowAcePrompt(false);
+    
+      let result = score;
+      if (isAce11 && score + 11 <= 21) {
+        result += 11;
+      } else {
+        result += 1;
+      }
+    
+      setScore(result);
+    };
+  
 
   return (
     <>
@@ -159,6 +163,7 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
               }}
             />
           </Stack>
+          {showAcePrompt && <AceValuePrompt onAceSelection={handleAceSelection} />}
           <ToastContainer />
         </div>
       </div>

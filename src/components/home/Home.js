@@ -7,8 +7,6 @@ import {
   NewDeckOfCard,
   drawTwoCardFromExistingDeck,
 } from "../../axiosCalls/AxiosCalls.js";
-
-// Style
 import "./home.css";
 
 const Home = () => {

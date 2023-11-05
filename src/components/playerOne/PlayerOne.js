@@ -1,15 +1,15 @@
 // Imports
-import React, { useState } from "react";
+import React from "react";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { drawOneCardFromExistingDeck } from "../../axiosCalls/AxiosCalls.js";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import Stack from "@mui/material/Stack";
-import "./PlayerOne.css";
 import AceValuePrompt from "../aceValuePrompt/AceValuePrompt.js"; // Adjust the path accordingly
+import "./PlayerOne.css";
+import "react-toastify/dist/ReactToastify.css";
+
 const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
   // STATES:
   const [player1CardObj, setPlayer1CardObj] = React.useState(player1cards);
@@ -17,7 +17,10 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
     React.useState(null);
   const [hitCards, setHitCards] = React.useState(null);
   const [score, setScore] = React.useState(null);
-  const [showAcePrompt, setShowAcePrompt] = useState(false);
+  const [showAcePrompt, setShowAcePrompt] = React.useState(false);
+  const [player1Result, setPlayer1Result] = React.useState(null);
+  const [gameState, setGameState] = React.useState("playing");
+
   // LifeCycle:
   React.useEffect(() => {
     if (player1cards !== null) {
@@ -30,17 +33,15 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
       const cardVals = player1cards?.map((element) => element.value);
       setPlayer1CardFaceValues(cardVals);
     }
-  }, [player1cards]);
+  }, [deckId, player1cards]);
 
   React.useEffect(() => {
     if (deckId !== null && hitCards !== null) {
       const cardVals = hitCards?.map((element) => element.value);
-
       const newArray = player1CardFaceValues.concat(cardVals);
-
       setPlayer1CardFaceValues(newArray);
     }
-  }, [hitCards]);
+  }, [deckId, hitCards, player1CardFaceValues]);
 
   React.useEffect(() => {
     if (!player1CardFaceValues || player1CardFaceValues.length === 0) {
@@ -48,13 +49,12 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
     }
 
     let result = 0;
-    let aceCount = 0;
+    let aceCount = 0; // Initialize aceCount to 0
 
     player1CardFaceValues.forEach((element) => {
       if (element === "ACE" && result < 21) {
-        // Show AceValuePrompt instead of window.confirm
         setShowAcePrompt(true);
-      } else if (["KING", "QUEEN", "JACK"].includes(element)) {
+              } else if (["KING", "QUEEN", "JACK"].includes(element)) {
         result += 10;
       } else {
         const nums = parseInt(element, 10);
@@ -62,7 +62,6 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
       }
     });
 
-    // Adjust ACE values based on the total result
     while (aceCount > 0 && result > 21) {
       result -= 10;
       aceCount -= 1;
@@ -72,6 +71,23 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
   }, [player1CardFaceValues, hitCards, player1CardObj]);
 
   // Functions:
+
+  const resetGame = () => {
+    setPlayer1CardObj([]);
+    setPlayer1CardFaceValues([]);
+    setHitCards([]);
+    setScore(null);
+    setShowAcePrompt(false);
+    setPlayer1Result(null);
+    setGameState("playing");
+  };
+
+  React.useEffect(() => {
+    if (gameState !== "playing") {
+      resetGame();
+    }
+  }, [gameState, resetGame]);
+
   const renderImageList = (cards) => (
     <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
       {cards?.map((item) => (
@@ -87,31 +103,19 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
     </ImageList>
   );
 
-  const notify = () =>
-    toast.success("Hit!", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-    });
+  const handleAceSelection = (isAce11) => {
+    setShowAcePrompt(false);
 
-    const handleAceSelection = (isAce11) => {
-      setShowAcePrompt(false);
-    
-      let result = score;
-      if (isAce11 && score + 11 <= 21) {
-        result += 11;
-      } else {
-        result += 1;
-      }
-    
-      setScore(result);
-    };
-  
+    let result = score;
+    if (isAce11 && score + 11 <= 21) {
+      result += 11;
+    } else {
+      result += 1;
+    }
+
+    setScore(result);
+};
+
 
   return (
     <>
@@ -125,17 +129,13 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
               variant="contained"
               disabled={score > 21}
               onClick={() => {
-                drawOneCardFromExistingDeck(deckId)
-                  .then((res) => {
-                    setPlayer1CardObj((prev) => [...prev, ...res.data.cards]);
-                    setPlayer1CardFaceValues((prev) => [
-                      ...prev,
-                      ...res.data.cards.map((card) => card.value),
-                    ]);
-                  })
-                  .then(() => {
-                    notify();
-                  });
+                drawOneCardFromExistingDeck(deckId).then((res) => {
+                  setPlayer1CardObj((prev) => [...prev, ...res.data.cards]);
+                  setPlayer1CardFaceValues((prev) => [
+                    ...prev,
+                    ...res.data.cards.map((card) => card.value),
+                  ]);
+                });
               }}
             >
               Hit Me
@@ -155,8 +155,7 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
               type="number"
               size="small"
               width="100%"
-              variant="standard"
-              color="warning"
+              variant="filled"
               value={score}
               InputLabelProps={{
                 shrink: true,
@@ -164,7 +163,6 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
             />
           </Stack>
           {showAcePrompt && <AceValuePrompt onAceSelection={handleAceSelection} />}
-          <ToastContainer />
         </div>
       </div>
     </>

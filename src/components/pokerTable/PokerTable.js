@@ -1,7 +1,7 @@
 // PokerTable.js
 import React from "react";
-import "./PokerTable.css";
 import Home from "../home/Home.js";
+import "./PokerTable.css";
 
 const PokerTable = () => {
   return (

@@ -1,6 +1,5 @@
 // App.js
 import React from 'react';
-// Import your components
 import PokerTable from './components/pokerTable/PokerTable.js';
 
 

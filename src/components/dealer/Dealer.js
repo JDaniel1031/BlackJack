@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import Button from "@mui/material/Button";
@@ -8,6 +8,10 @@ import { ToastContainer, toast } from "react-toastify";
 import Stack from '@mui/material/Stack';
 import "react-toastify/dist/ReactToastify.css";
 import "./Dealer.css"
+
+
+
+
 const Dealer = ({ deckId, player2cards, dealerDetails }) => {
   // STATES:
   const [dealerCardObj, setDealerCardObj] = React.useState(player2cards);
@@ -15,6 +19,7 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
     React.useState(null);
   const [hitCards, setHitCards] = React.useState(null);
   const [score, setScore] = React.useState(null);
+  const [showAcePrompt, setShowAcePrompt] = useState(false);
 
   // LifeCycle:
   React.useEffect(() => {
@@ -50,15 +55,8 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
 
     dealerCardFaceValues.forEach((element) => {
       if (element === "ACE" && result < 21) {
-        // Prompt the player to decide if the value of "ACE" should be 11 or 1
-        const isAce11 = window.confirm(
-          "Do you want the value of ACE to be 11?"
-        );
-        if (isAce11) {
-          result += 11;
-        } else {
-          result += 1;
-        }
+        // Assume ace value is always 11 for the dealer
+        result += 11;
       } else if (["KING", "QUEEN", "JACK"].includes(element)) {
         result += 10;
       } else {
@@ -79,11 +77,11 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
   // Functions:
   const renderImageList = (cards) => (
     <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
-      {cards?.map((item) => (
+      {cards?.map((item, index) => (
         <ImageListItem key={item.image}>
           <img
-            srcSet={`${item.image}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-            src={`${item.image}?w=164&h=164&fit=crop&auto=format`}
+            srcSet={`${index === 1 ? 'https://www.deckofcardsapi.com/static/img/back.png' : item.image}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+            src={`${index === 1 ? 'https://www.deckofcardsapi.com/static/img/back.png' : item.image}?w=164&h=164&fit=crop&auto=format`}
             alt={item.code}
             loading="lazy"
           />
@@ -133,19 +131,6 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
         >
           Stay
         </Button>
-        <TextField
-          id="outlined-number"
-          label="Dealer Total"
-          type="number"
-          size="small"
-          width="100%"
-          variant="standard"
-          color="warning"
-          value={score}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
       </Stack>
       <ToastContainer />
         </div>
@@ -155,3 +140,4 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
 };
 
 export default Dealer;
+

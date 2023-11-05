@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
@@ -89,29 +89,6 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
     </ImageList>
   );
 
-  const notify = () =>
-    toast.success("Hit!", {
-      position: "bottom-left",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-    });
-
-    const notifyError = () =>
-    toast.error("Bust!", {
-      position: "bottom-left",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-    });
   return (
     <>
       <div>
@@ -155,19 +132,11 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
                 variant="contained"
                 disabled={score > 21}
                 onClick={() => {
-                  drawOneCardFromExistingDeck(deckId)
-                    .then((res) => {
-                      setHitCards(res.data.cards);
-                      const newArray = wholeShaBang.concat(res.data.cards);
-                      setWholeShaBang(newArray);
-                    })
-                    .then(() => {
-                      if(score < 21){
-                        notify();
-                      }else {
-                        notifyError()
-                      }
-                    });
+                  drawOneCardFromExistingDeck(deckId).then((res) => {
+                    setHitCards(res.data.cards);
+                    const newArray = wholeShaBang.concat(res.data.cards);
+                    setWholeShaBang(newArray);
+                  });
                 }}
               >
                 Hit Me

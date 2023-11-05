@@ -1,3 +1,5 @@
+// Imports
+
 import React from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -11,51 +13,60 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { drawOneCardFromExistingDeck } from "../../axiosCalls/AxiosCalls.js";
 import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
-import {randomImages} from "../randomAvatar/RandomAvatar.js"
+import "react-toastify/dist/ReactToastify.css";
+import { randomImages } from "../randomAvatar/RandomAvatar.js";
+import Stack from '@mui/material/Stack';
 const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
   // STATES:
-  const [wholeShaBang, setWholeShaBang] = React.useState(player1cards);
-  const [player1WholeCardObj, setPlayer1WholeCardObj] = React.useState(null);
+  const [player1CardObj, setPlayer1CardObj] = React.useState(player1cards);
+  const [player1CardFaceValues, setPlayer1CardFaceValues] =
+    React.useState(null);
   const [hitCards, setHitCards] = React.useState(null);
   const [score, setScore] = React.useState(null);
-console.log(randomImages,"randomImages")
+
   // LifeCycle:
   React.useEffect(() => {
     if (player1cards !== null) {
-      setWholeShaBang(player1cards);
+      setPlayer1CardObj(player1cards);
     }
   }, [player1cards]);
 
   React.useEffect(() => {
     if (deckId !== null && player1cards !== null) {
-      const cardVals = player1cards.map((element) => element.value);
-      setPlayer1WholeCardObj(cardVals);
+      const cardVals = player1cards?.map((element) => element.value);
+      setPlayer1CardFaceValues(cardVals);
     }
   }, [player1cards]);
 
   React.useEffect(() => {
     if (deckId !== null && hitCards !== null) {
-      const cardVals = hitCards.map((element) => element.value);
+      const cardVals = hitCards?.map((element) => element.value);
 
-      const newArray = player1WholeCardObj.concat(cardVals);
+      const newArray = player1CardFaceValues.concat(cardVals);
 
-      setPlayer1WholeCardObj(newArray);
+      setPlayer1CardFaceValues(newArray);
     }
   }, [hitCards]);
 
   React.useEffect(() => {
-    if (!player1WholeCardObj || player1WholeCardObj.length === 0) {
+    if (!player1CardFaceValues || player1CardFaceValues.length === 0) {
       return;
     }
 
     let result = 0;
     let aceCount = 0;
 
-    player1WholeCardObj.forEach((element) => {
-      if (element === "ACE") {
-        aceCount += 1;
-        result += 11;
+    player1CardFaceValues.forEach((element) => {
+      if (element === "ACE" && result < 21) {
+        // Prompt the player to decide if the value of "ACE" should be 11 or 1
+        const isAce11 = window.confirm(
+          "Do you want the value of ACE to be 11?"
+        );
+        if (isAce11) {
+          result += 11;
+        } else {
+          result += 1;
+        }
       } else if (["KING", "QUEEN", "JACK"].includes(element)) {
         result += 10;
       } else {
@@ -71,7 +82,7 @@ console.log(randomImages,"randomImages")
     }
 
     setScore(result);
-  }, [player1WholeCardObj, hitCards]);
+  }, [player1CardFaceValues, hitCards]);
 
   // Functions:
   const renderImageList = (cards) => (
@@ -89,20 +100,21 @@ console.log(randomImages,"randomImages")
     </ImageList>
   );
 
-  const notify = () => toast.success('Hit!', {
-    position: "bottom-left",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "light",
-    });;
+  const notify = () =>
+    toast.success("Hit!", {
+      position: "bottom-left",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
 
   return (
     <>
-      <div>
+      {/* <div>
         <Card sx={{ maxWidth: 345 }} className="playerOneCard">
           <CardActionArea>
             <CardMedia
@@ -139,28 +151,43 @@ console.log(randomImages,"randomImages")
                 />
               </Box>
               <br></br>
-              <Button
-                variant="contained"
-                disabled={score > 21}
-                onClick={() => {
-                  drawOneCardFromExistingDeck(deckId).then((res) => {
-                    setHitCards(res.data.cards);
-                    const newArray = wholeShaBang.concat(res.data.cards);
-                    setWholeShaBang(newArray);
-                    
-                  }).then(()=>{notify()})
-                  ;
-                }}
-              >
-                Hit Me
-              </Button>
+
               <ToastContainer />
             </CardContent>
           </CardActionArea>
           <CardActions></CardActions>
         </Card>
-      </div>
-      <div>{wholeShaBang !== null && renderImageList(wholeShaBang)}</div>
+      </div> */}
+
+      <div>{player1CardObj !== null && renderImageList(player1CardObj)}</div>
+      <Stack spacing={2} direction="row">
+      <Button
+        variant="contained"
+        disabled={score > 21}
+        onClick={() => {
+          drawOneCardFromExistingDeck(deckId)
+            .then((res) => {
+              setHitCards(res.data.cards);
+              const newArray = player1CardObj.concat(res.data.cards);
+              setPlayer1CardObj(newArray);
+            })
+            .then(() => {
+              notify();
+            });
+        }}
+      >
+        Hit Me
+      </Button>
+      <Button
+        variant="contained"
+        disabled={score > 21}
+        onClick={() => {
+          //
+        }}
+      >
+        Stay
+      </Button>
+    </Stack>
     </>
   );
 };

@@ -1,16 +1,19 @@
-
-.containerStyle{
+/* home.css */
+.containerStyle {
+    /* Add any styles for the containerStyle div */
+  }
+  
+  .containerStyleButton {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-}
-
-.containerStyleButton{
-    padding-top: 2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-right: 60rem;
-    
-}
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Adjust as needed */
+  }
+  
+  .playButton {
+    /* Add any additional styling for the playButton */
+  }
+  
+  .fixed-content {
+    overflow: hidden;
+  }

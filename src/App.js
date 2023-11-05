@@ -1,14 +1,14 @@
 // App.js
 import React from 'react';
 // Import your components
-import Home from './components/home/Home.js';
-
+import PokerTable from './components/pokerTable/PokerTable.js';
 
 
 const App = () => {
   return (
-    
-    <Home></Home>
+    <>
+    <PokerTable/>
+    </>
   );
 };
 

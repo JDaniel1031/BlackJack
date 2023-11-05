@@ -1,21 +1,16 @@
 // Imports
 
 import React from "react";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Typography from "@mui/material/Typography";
-import { CardActionArea, CardActions } from "@mui/material";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { drawOneCardFromExistingDeck } from "../../axiosCalls/AxiosCalls.js";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { randomImages } from "../randomAvatar/RandomAvatar.js";
-import Stack from '@mui/material/Stack';
+import Stack from "@mui/material/Stack";
+import "./PlayerOne.css";
+
 const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
   // STATES:
   const [player1CardObj, setPlayer1CardObj] = React.useState(player1cards);
@@ -102,7 +97,7 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
 
   const notify = () =>
     toast.success("Hit!", {
-      position: "bottom-left",
+      position: "top-right",
       autoClose: 5000,
       hideProgressBar: false,
       closeOnClick: true,
@@ -114,80 +109,47 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
 
   return (
     <>
-      {/* <div>
-        <Card sx={{ maxWidth: 345 }} className="playerOneCard">
-          <CardActionArea>
-            <CardMedia
-              component="img"
-              height="500"
-              image={randomImages[0].id}
-              alt="green iguana"
-            />
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
-                Player 1
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                DeckId : {deckId}
-                Score : {score}
-                <br></br>
-              </Typography>
-              <Box
-                component="form"
-                sx={{
-                  "& > :not(style)": { m: 1, width: "25ch" },
-                }}
-                noValidate
-                autoComplete="off"
-              >
-                <TextField
-                  id="outlined-number"
-                  label="Number"
-                  type="number"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  value={score}
-                />
-              </Box>
-              <br></br>
-
-              <ToastContainer />
-            </CardContent>
-          </CardActionArea>
-          <CardActions></CardActions>
-        </Card>
-      </div> */}
-
-      <div>{player1CardObj !== null && renderImageList(player1CardObj)}</div>
+      {player1CardObj !== null && renderImageList(player1CardObj)}
       <Stack spacing={2} direction="row">
-      <Button
-        variant="contained"
-        disabled={score > 21}
-        onClick={() => {
-          drawOneCardFromExistingDeck(deckId)
-            .then((res) => {
-              setHitCards(res.data.cards);
-              const newArray = player1CardObj.concat(res.data.cards);
-              setPlayer1CardObj(newArray);
-            })
-            .then(() => {
-              notify();
-            });
-        }}
-      >
-        Hit Me
-      </Button>
-      <Button
-        variant="contained"
-        disabled={score > 21}
-        onClick={() => {
-          //
-        }}
-      >
-        Stay
-      </Button>
-    </Stack>
+        <Button
+          variant="contained"
+          disabled={score > 21}
+          onClick={() => {
+            drawOneCardFromExistingDeck(deckId)
+              .then((res) => {
+                setPlayer1CardObj((prev) => [...prev, ...res.data.cards]);
+              })
+              .then(() => {
+                notify();
+              });
+          }}
+        >
+          Hit Me
+        </Button>
+        <Button
+          variant="contained"
+          disabled={score > 21}
+          onClick={() => {
+            // Add functionality for the "Stay" button
+          }}
+        >
+          Stay
+        </Button>
+        <TextField
+          id="outlined-number"
+          label="Player 1 Total"
+          type="number"
+          size="small"
+          width="100%"
+          variant="standard"
+          color="warning"
+          value={score}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+      </Stack>
+      <ToastContainer />
     </>
   );
 };

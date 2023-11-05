@@ -1,61 +1,63 @@
 import React from "react";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Typography from "@mui/material/Typography";
-import { CardActionArea, CardActions } from "@mui/material";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { drawOneCardFromExistingDeck } from "../../axiosCalls/AxiosCalls.js";
 import { ToastContainer, toast } from "react-toastify";
+import Stack from '@mui/material/Stack';
 import "react-toastify/dist/ReactToastify.css";
-import { randomImages } from "../randomAvatar/RandomAvatar.js";
 const Dealer = ({ deckId, player2cards, dealerDetails }) => {
   // STATES:
-  const [wholeShaBang, setWholeShaBang] = React.useState(player2cards);
-  const [player1WholeCardObj, setPlayer1WholeCardObj] = React.useState(null);
+  const [dealerCardObj, setDealerCardObj] = React.useState(player2cards);
+  const [dealerCardFaceValues, setDealerCardFaceValues] =
+    React.useState(null);
   const [hitCards, setHitCards] = React.useState(null);
   const [score, setScore] = React.useState(null);
 
   // LifeCycle:
   React.useEffect(() => {
     if (player2cards !== null) {
-      setWholeShaBang(player2cards);
+      setDealerCardObj(player2cards);
     }
   }, [player2cards]);
 
   React.useEffect(() => {
     if (deckId !== null && player2cards !== null) {
-      const cardVals = player2cards.map((element) => element.value);
-      setPlayer1WholeCardObj(cardVals);
+      const cardVals = player2cards?.map((element) => element.value);
+      setDealerCardFaceValues(cardVals);
     }
   }, [player2cards]);
 
   React.useEffect(() => {
     if (deckId !== null && hitCards !== null) {
-      const cardVals = hitCards.map((element) => element.value);
+      const cardVals = hitCards?.map((element) => element.value);
 
-      const newArray = player1WholeCardObj.concat(cardVals);
+      const newArray = dealerCardFaceValues.concat(cardVals);
 
-      setPlayer1WholeCardObj(newArray);
+      setDealerCardFaceValues(newArray);
     }
   }, [hitCards]);
 
   React.useEffect(() => {
-    if (!player1WholeCardObj || player1WholeCardObj.length === 0) {
+    if (!dealerCardFaceValues || dealerCardFaceValues.length === 0) {
       return;
     }
 
     let result = 0;
     let aceCount = 0;
 
-    player1WholeCardObj.forEach((element) => {
-      if (element === "ACE") {
-        aceCount += 1;
-        result += 11;
+    dealerCardFaceValues.forEach((element) => {
+      if (element === "ACE" && result < 21) {
+        // Prompt the player to decide if the value of "ACE" should be 11 or 1
+        const isAce11 = window.confirm(
+          "Do you want the value of ACE to be 11?"
+        );
+        if (isAce11) {
+          result += 11;
+        } else {
+          result += 1;
+        }
       } else if (["KING", "QUEEN", "JACK"].includes(element)) {
         result += 10;
       } else {
@@ -71,7 +73,7 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
     }
 
     setScore(result);
-  }, [player1WholeCardObj, hitCards]);
+  }, [dealerCardFaceValues, hitCards]);
 
   // Functions:
   const renderImageList = (cards) => (
@@ -89,66 +91,63 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
     </ImageList>
   );
 
+  const notify = () => toast.success('Hit!', {
+    position: "bottom-left",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "light",
+  });
+
   return (
     <>
-      <div>
-        <Card sx={{ maxWidth: 345 }} className="playerOneCard">
-          <CardActionArea>
-            <CardMedia
-              component="img"
-              height="500"
-              image={randomImages[1].id}
-              alt="green iguana"
-            />
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
-                Dealer
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                DeckId : {deckId}
-                Score : {score}
-                <br></br>
-              </Typography>
-              <Box
-                component="form"
-                sx={{
-                  "& > :not(style)": { m: 1, width: "25ch" },
-                }}
-                noValidate
-                autoComplete="off"
-              >
-                <TextField
-                  id="outlined-number"
-                  label="Number"
-                  type="number"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  value={score}
-                />
-              </Box>
-              <br></br>
-              <Button
-                variant="contained"
-                disabled={score > 21}
-                onClick={() => {
-                  drawOneCardFromExistingDeck(deckId).then((res) => {
-                    setHitCards(res.data.cards);
-                    const newArray = wholeShaBang.concat(res.data.cards);
-                    setWholeShaBang(newArray);
-                  });
-                }}
-              >
-                Hit Me
-              </Button>
-              <ToastContainer />
-            </CardContent>
-          </CardActionArea>
-          <CardActions></CardActions>
-        </Card>
-      </div>
-      <div>{wholeShaBang !== null && renderImageList(wholeShaBang)}</div>
-    </>
+    {dealerCardObj !== null && renderImageList(dealerCardObj)}
+     
+    
+     <Stack spacing={2} direction="row" style={{ marginRight:"auto" }}>
+       <Button
+         variant="contained"
+         disabled={score > 21}
+         onClick={() => {
+           drawOneCardFromExistingDeck(deckId)
+             .then((res) => {
+              setDealerCardObj((prev) => [...prev, ...res.data.cards]);
+             })
+             .then(() => {
+               notify();
+             });
+         }}
+       >
+         Hit Me
+       </Button>
+       <Button
+         variant="contained"
+         disabled={score > 21}
+         onClick={() => {
+           // Add functionality for the "Stay" button
+         }}
+       >
+         Stay
+       </Button>
+       <TextField
+         id="outlined-number"
+         label="Dealer Total"
+         type="number"
+         size="small"
+         variant="standard"
+         color="warning"
+         value={score}
+         InputLabelProps={{
+           shrink: true,
+         }}
+       />
+     </Stack>
+     <ToastContainer />
+     
+   </>
   );
 };
 

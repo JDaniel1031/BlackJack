@@ -1,0 +1,12 @@
+.button-stack {
+    position: absolute;
+    bottom: 0;
+    right: 0; 
+  }
+
+.card-renders {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }

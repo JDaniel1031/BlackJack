@@ -2,7 +2,11 @@
 import React from "react";
 import PlayerOne from "../playerOne/PlayerOne.js";
 import Button from "@mui/material/Button";
-import { NewDeckOfCard, drawTwoCardFromExistingDeck } from "../../axiosCalls/AxiosCalls.js";
+import Dealer from "../dealer/Dealer.js"
+import {
+  NewDeckOfCard,
+  drawTwoCardFromExistingDeck,
+} from "../../axiosCalls/AxiosCalls.js";
 
 // Style
 import "./home.css";
@@ -43,7 +47,7 @@ const Home = () => {
   };
 
   return (
-    <>
+    <div className="home-container">
       {!isLetsPlayClicked && (
         <Button
           variant="contained"
@@ -53,30 +57,32 @@ const Home = () => {
               setIsLetsPlayClicked(true);
             });
           }}
-          className="playButton" // Added class for styling
+          className="playButton"
         >
           Lets Play
         </Button>
       )}
 
-      {/* Lock scrolling by setting overflow: hidden */}
       {isLetsPlayClicked && (
-        <div className="fixed-content">
-          <PlayerOne
-            deckId={deckId}
-            player1cards={player1cards}
-            player1Details={player1Details}
-            dealerDetails={dealerDetails}
-          />
-
-          {/* <Dealer
-            deckId={deckId}
-            player2cards={dealerCards}
-            dealerDetails={dealerDetails}
-          /> */}
+        <div className="players-container">
+          <div className="dealer-container">
+            <Dealer
+              deckId={deckId}
+              player2cards={dealerCards}
+              dealerDetails={dealerDetails}
+            />
+          </div>
+          <div className="player-one-container ">
+            <PlayerOne
+              deckId={deckId}
+              player1cards={player1cards}
+              player1Details={player1Details}
+              dealerDetails={dealerDetails}
+            />
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

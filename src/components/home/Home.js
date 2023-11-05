@@ -64,7 +64,7 @@ const Home = () => {
       )}
 
       {isLetsPlayClicked && (
-        <div className="players-container">
+        <div className="players-container" >
           <div className="dealer-container">
             <Dealer
               deckId={deckId}

@@ -18,7 +18,9 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
     React.useState(null);
   const [hitCards, setHitCards] = React.useState(null);
   const [score, setScore] = React.useState(null);
-
+  console.log(player1CardObj, "player1CardObj");
+  console.log(player1CardFaceValues, "player1CardFaceValues");
+  console.log(score, "score");
   // LifeCycle:
   React.useEffect(() => {
     if (player1cards !== null) {
@@ -77,7 +79,7 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
     }
 
     setScore(result);
-  }, [player1CardFaceValues, hitCards]);
+  }, [player1CardFaceValues, hitCards, player1CardObj]);
 
   // Functions:
   const renderImageList = (cards) => (
@@ -109,47 +111,57 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
 
   return (
     <>
-      {player1CardObj !== null && renderImageList(player1CardObj)}
-      <Stack spacing={2} direction="row">
-        <Button
-          variant="contained"
-          disabled={score > 21}
-          onClick={() => {
-            drawOneCardFromExistingDeck(deckId)
-              .then((res) => {
-                setPlayer1CardObj((prev) => [...prev, ...res.data.cards]);
-              })
-              .then(() => {
-                notify();
-              });
-          }}
-        >
-          Hit Me
-        </Button>
-        <Button
-          variant="contained"
-          disabled={score > 21}
-          onClick={() => {
-            // Add functionality for the "Stay" button
-          }}
-        >
-          Stay
-        </Button>
-        <TextField
-          id="outlined-number"
-          label="Player 1 Total"
-          type="number"
-          size="small"
-          width="100%"
-          variant="standard"
-          color="warning"
-          value={score}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
-      </Stack>
-      <ToastContainer />
+      <div>
+        <div className="card-renders">
+          {player1CardObj !== null && renderImageList(player1CardObj)}
+        </div>
+        <div>
+          <Stack spacing={2} direction="row">
+            <Button
+              variant="contained"
+              disabled={score > 21}
+              onClick={() => {
+                drawOneCardFromExistingDeck(deckId)
+                  .then((res) => {
+                    setPlayer1CardObj((prev) => [...prev, ...res.data.cards]);
+                    setPlayer1CardFaceValues((prev) => [
+                      ...prev,
+                      ...res.data.cards.map((card) => card.value),
+                    ]);
+                  })
+                  .then(() => {
+                    notify();
+                  });
+              }}
+            >
+              Hit Me
+            </Button>
+            <Button
+              variant="contained"
+              disabled={score > 21}
+              onClick={() => {
+                // Add functionality for the "Stay" button
+              }}
+            >
+              Stay
+            </Button>
+            <TextField
+              id="outlined-number"
+              label="Player 1 Total"
+              type="number"
+              size="small"
+              width="100%"
+              variant="standard"
+              color="warning"
+              value={score}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          </Stack>
+          <ToastContainer />
+        </div>
+      </div>
     </>
   );
 };

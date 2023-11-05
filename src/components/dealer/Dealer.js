@@ -7,6 +7,7 @@ import { drawOneCardFromExistingDeck } from "../../axiosCalls/AxiosCalls.js";
 import { ToastContainer, toast } from "react-toastify";
 import Stack from '@mui/material/Stack';
 import "react-toastify/dist/ReactToastify.css";
+import "./Dealer.css"
 const Dealer = ({ deckId, player2cards, dealerDetails }) => {
   // STATES:
   const [dealerCardObj, setDealerCardObj] = React.useState(player2cards);
@@ -104,50 +105,52 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
 
   return (
     <>
-    {dealerCardObj !== null && renderImageList(dealerCardObj)}
-     
-    
-     <Stack spacing={2} direction="row" style={{ marginRight:"auto" }}>
-       <Button
-         variant="contained"
-         disabled={score > 21}
-         onClick={() => {
-           drawOneCardFromExistingDeck(deckId)
-             .then((res) => {
-              setDealerCardObj((prev) => [...prev, ...res.data.cards]);
-             })
-             .then(() => {
-               notify();
-             });
-         }}
-       >
-         Hit Me
-       </Button>
-       <Button
-         variant="contained"
-         disabled={score > 21}
-         onClick={() => {
-           // Add functionality for the "Stay" button
-         }}
-       >
-         Stay
-       </Button>
-       <TextField
-         id="outlined-number"
-         label="Dealer Total"
-         type="number"
-         size="small"
-         variant="standard"
-         color="warning"
-         value={score}
-         InputLabelProps={{
-           shrink: true,
-         }}
-       />
-     </Stack>
-     <ToastContainer />
-     
-   </>
+    <div>
+      <div className="dealer-card-renders">{dealerCardObj !== null && renderImageList(dealerCardObj)}</div>
+      <div>
+        <Stack spacing={2} direction="row">
+        <Button
+          variant="contained"
+          disabled={score > 21}
+          onClick={() => {
+            drawOneCardFromExistingDeck(deckId)
+              .then((res) => {
+                setDealerCardObj((prev) => [...prev, ...res.data.cards]);
+              })
+              .then(() => {
+                notify();
+              });
+          }}
+        >
+          Hit Me
+        </Button>
+        <Button
+          variant="contained"
+          disabled={score > 21}
+          onClick={() => {
+            // Add functionality for the "Stay" button
+          }}
+        >
+          Stay
+        </Button>
+        <TextField
+          id="outlined-number"
+          label="Dealer Total"
+          type="number"
+          size="small"
+          width="100%"
+          variant="standard"
+          color="warning"
+          value={score}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+      </Stack>
+      <ToastContainer />
+        </div>
+    </div>
+  </>
   );
 };
 

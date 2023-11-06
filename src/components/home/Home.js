@@ -7,6 +7,7 @@ import {
   NewDeckOfCard,
   drawTwoCardFromExistingDeck,
 } from "../../axiosCalls/AxiosCalls.js";
+import useStore from "../gameStore/useStore.js";
 import "./home.css";
 
 const Home = () => {
@@ -18,14 +19,26 @@ const Home = () => {
   const [dealerCards, setDealerCards] = React.useState();
   const [isLetsPlayClicked, setIsLetsPlayClicked] = React.useState(false);
 
-  // LifesCyle:
+  const { stateObject } = useStore();
+  React.useEffect(() => {
+   if(stateObject.isGameOver){
+    setDeckId(null)
+    setPlayer1Cards(null)
+    setPlayer1Details(null)
+    setDealerDetails(null)
+    setDealerCards(null)
+    setIsLetsPlayClicked(false)
+   }
+  }, [stateObject]);
+
+  // get and save current deckId
   React.useEffect(() => {
     if (deckId !== null) {
       initialDealerDraw(deckId);
     }
   }, [deckId]);
 
-  // Functions
+  // start of the game . player 1 and dealer get their cards 
   const initialDealerDraw = (deckId) => {
     // Dealer draws two cards
     drawTwoCardFromExistingDeck(deckId)
@@ -50,6 +63,7 @@ const Home = () => {
         <Button
           variant="contained"
           onClick={() => {
+            // start of the game "Lets Play"
             NewDeckOfCard().then((res) => {
               setDeckId(res.data.deck_id);
               setIsLetsPlayClicked(true);

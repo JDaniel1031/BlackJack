@@ -7,6 +7,7 @@ import TextField from "@mui/material/TextField";
 import { drawOneCardFromExistingDeck } from "../../axiosCalls/AxiosCalls.js";
 import Stack from "@mui/material/Stack";
 import AceValuePrompt from "../aceValuePrompt/AceValuePrompt.js"; // Adjust the path accordingly
+import useStore from "../gameStore/useStore.js";
 import "./PlayerOne.css";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -20,6 +21,23 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
   const [showAcePrompt, setShowAcePrompt] = React.useState(false);
   const [player1Result, setPlayer1Result] = React.useState(null);
   const [gameState, setGameState] = React.useState("playing");
+  const { stateObject, updateStateObject  } = useStore();
+
+
+  const handleIsGameOver = (myBool) => {
+    // Update the state object
+    updateStateObject({ isGameOver: myBool });
+  };
+  const handleStay = (myBool) => {
+    // Update the state object
+    updateStateObject({ playerOneStay: myBool });
+  };
+
+  React.useEffect(() => {
+    if (score >= 21 ) {
+      handleIsGameOver(true);
+    }
+  }, [score]);
 
   // LifeCycle:
   React.useEffect(() => {
@@ -62,10 +80,10 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
       }
     });
 
-    while (aceCount > 0 && result > 21) {
-      result -= 10;
-      aceCount -= 1;
-    }
+    // while (aceCount > 0 && result > 21) {
+    //   result -= 10;
+    //   aceCount -= 1;
+    // }
 
     setScore(result);
   }, [player1CardFaceValues, hitCards, player1CardObj]);
@@ -107,7 +125,7 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
     setShowAcePrompt(false);
 
     let result = score;
-    if (isAce11 && score + 11 <= 21) {
+    if (isAce11) {
       result += 11;
     } else {
       result += 1;
@@ -142,9 +160,9 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
             </Button>
             <Button
               variant="contained"
-              disabled={score > 21}
+              disabled={stateObject.playerOneStay}
               onClick={() => {
-                // Add functionality for the "Stay" button
+                handleStay(true)
               }}
             >
               Stay

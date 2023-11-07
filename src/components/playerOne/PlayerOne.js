@@ -6,7 +6,6 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { drawOneCardFromExistingDeck } from "../../axiosCalls/AxiosCalls.js";
 import Stack from "@mui/material/Stack";
-import AceValuePrompt from "../aceValuePrompt/AceValuePrompt.js"; // Adjust the path accordingly
 import useStore from "../gameStore/useStore.js";
 import "./PlayerOne.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,7 +17,6 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
     React.useState(null);
   const [hitCards, setHitCards] = React.useState(null);
   const [score, setScore] = React.useState(null);
-  const [showAcePrompt, setShowAcePrompt] = React.useState(false);
   const [player1Result, setPlayer1Result] = React.useState(null);
   const [gameState, setGameState] = React.useState("playing");
   const { stateObject, updateStateObject  } = useStore();
@@ -67,24 +65,23 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
     }
 
     let result = 0;
-    let aceCount = 0; // Initialize aceCount to 0
-
+    let aceCount = 0
     player1CardFaceValues.forEach((element) => {
-      if (element === "ACE" && result < 21) {
-        setShowAcePrompt(true);
-              } else if (["KING", "QUEEN", "JACK"].includes(element)) {
+      if (element === "ACE") {
+        result += 11;
+        aceCount += 1;
+      } else if (["KING", "QUEEN", "JACK"].includes(element)) {
         result += 10;
       } else {
         const nums = parseInt(element, 10);
         result += isNaN(nums) ? 0 : nums;
       }
     });
-
-    // while (aceCount > 0 && result > 21) {
-    //   result -= 10;
-    //   aceCount -= 1;
-    // }
-
+    
+    while (aceCount > 0 && result > 21) {
+      result -= 10;
+      aceCount -= 1;
+    }
     setScore(result);
   }, [player1CardFaceValues, hitCards, player1CardObj]);
 
@@ -95,7 +92,6 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
     setPlayer1CardFaceValues([]);
     setHitCards([]);
     setScore(null);
-    setShowAcePrompt(false);
     setPlayer1Result(null);
     setGameState("playing");
   };
@@ -120,20 +116,6 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
       ))}
     </ImageList>
   );
-
-  const handleAceSelection = (isAce11) => {
-    setShowAcePrompt(false);
-
-    let result = score;
-    if (isAce11) {
-      result += 11;
-    } else {
-      result += 1;
-    }
-
-    setScore(result);
-};
-
 
   return (
     <>
@@ -180,7 +162,6 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
               }}
             />
           </Stack>
-          {showAcePrompt && <AceValuePrompt onAceSelection={handleAceSelection} />}
         </div>
       </div>
     </>

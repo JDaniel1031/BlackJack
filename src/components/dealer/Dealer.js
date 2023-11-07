@@ -1,27 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
-import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { drawOneCardFromExistingDeck } from "../../axiosCalls/AxiosCalls.js";
-import { ToastContainer, toast } from "react-toastify";
-import Stack from '@mui/material/Stack';
+import Stack from "@mui/material/Stack";
+import useStore from "../gameStore/useStore.js";
 import "react-toastify/dist/ReactToastify.css";
-import "./Dealer.css"
-
-
-
+import "./Dealer.css";
 
 const Dealer = ({ deckId, player2cards, dealerDetails }) => {
   // STATES:
   const [dealerCardObj, setDealerCardObj] = React.useState(player2cards);
-  const [dealerCardFaceValues, setDealerCardFaceValues] =
-    React.useState(null);
+  const [dealerCardFaceValues, setDealerCardFaceValues] = React.useState(null);
   const [hitCards, setHitCards] = React.useState(null);
   const [score, setScore] = React.useState(null);
-  const [showAcePrompt, setShowAcePrompt] = useState(false);
-
+  const { stateObject, updateStateObject } = useStore();
+  const [allDealerCards, setAllDealerCards] = useState([]);
+  const [usedBackImage, setUsedBackImage] = React.useState(false);
+  console.log(allDealerCards, dealerCardObj, stateObject);
   // LifeCycle:
+  useEffect(() => {
+    // Whenever new dealer cards are drawn, update the allDealerCards state
+    if (player2cards) {
+      setAllDealerCards((prevCards) => [...prevCards, ...player2cards]);
+    }
+  }, [player2cards]);
+
   React.useEffect(() => {
     if (player2cards !== null) {
       setDealerCardObj(player2cards);
@@ -75,13 +78,35 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
   }, [dealerCardFaceValues, hitCards]);
 
   // Functions:
-  const renderImageList = (cards) => (
+  // const renderImageList = (cards) => (
+  //   <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
+  //     {cards?.map((item, index) => (
+  //       <ImageListItem key={item.image}>
+  //         <img
+  //           srcSet={`${index === 1 ? 'https://www.deckofcardsapi.com/static/img/back.png' : item.image}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+  //           src={`${index === 1 ? 'https://www.deckofcardsapi.com/static/img/back.png' : item.image}?w=164&h=164&fit=crop&auto=format`}
+  //           alt={item.code}
+  //           loading="lazy"
+  //         />
+  //       </ImageListItem>
+  //     ))}
+  //   </ImageList>
+  // );
+  const renderImageList = (cards, showBackImage) => (
     <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
       {cards?.map((item, index) => (
         <ImageListItem key={item.image}>
           <img
-            srcSet={`${index === 1 ? 'https://www.deckofcardsapi.com/static/img/back.png' : item.image}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-            src={`${index === 1 ? 'https://www.deckofcardsapi.com/static/img/back.png' : item.image}?w=164&h=164&fit=crop&auto=format`}
+            srcSet={`${
+              showBackImage && index === 1
+                ? "https://www.deckofcardsapi.com/static/img/back.png"
+                : item.image
+            }?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+            src={`${
+              showBackImage && index === 1
+                ? "https://www.deckofcardsapi.com/static/img/back.png"
+                : item.image
+            }?w=164&h=164&fit=crop&auto=format`}
             alt={item.code}
             loading="lazy"
           />
@@ -90,54 +115,33 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
     </ImageList>
   );
 
-  const notify = () => toast.success('Hit!', {
-    position: "bottom-left",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "light",
-  });
-
   return (
     <>
-    <div>
-      <div className="dealer-card-renders">{dealerCardObj !== null && renderImageList(dealerCardObj)}</div>
       <div>
-        <Stack spacing={2} direction="row">
-        <Button
-          variant="contained"
-          disabled={score > 21}
-          onClick={() => {
-            drawOneCardFromExistingDeck(deckId)
-              .then((res) => {
-                setDealerCardObj((prev) => [...prev, ...res.data.cards]);
-              })
-              .then(() => {
-                notify();
-              });
-          }}
-        >
-          Hit Me
-        </Button>
-        <Button
-          variant="contained"
-          disabled={score > 21}
-          onClick={() => {
-            // Add functionality for the "Stay" button
-          }}
-        >
-          Stay
-        </Button>
-      </Stack>
-      <ToastContainer />
+        <div className="dealer-card-renders">
+          {stateObject.playerOneStay
+            ? renderImageList(allDealerCards, false)
+            : renderImageList(dealerCardObj, true)}
         </div>
-    </div>
-  </>
+        <div>
+          <Stack spacing={2} direction="row">
+            <TextField
+              id="outlined-number"
+              label="Dealer Total"
+              type="number"
+              size="small"
+              width="100%"
+              variant="filled"
+              value={!stateObject.playerOneStay ? 777 : score}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          </Stack>
+        </div>
+      </div>
+    </>
   );
 };
 
 export default Dealer;
-

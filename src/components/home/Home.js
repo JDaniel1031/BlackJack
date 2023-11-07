@@ -19,7 +19,7 @@ const Home = () => {
   const [dealerCards, setDealerCards] = React.useState();
   const [isLetsPlayClicked, setIsLetsPlayClicked] = React.useState(false);
 
-  const { stateObject } = useStore();
+  const { stateObject, updateStateObject } = useStore();
   React.useEffect(() => {
    if(stateObject.isGameOver){
     setDeckId(null)
@@ -28,6 +28,7 @@ const Home = () => {
     setDealerDetails(null)
     setDealerCards(null)
     setIsLetsPlayClicked(false)
+    updateStateObject({ playerOneStay: false });
    }
   }, [stateObject]);
 
@@ -57,25 +58,24 @@ const Home = () => {
       });
   };
 
+  const renderLetsPlayButton = () => (
+    <Button
+      variant="contained"
+      onClick={() => {
+        NewDeckOfCard().then((res) => {
+          setDeckId(res.data.deck_id);
+          setIsLetsPlayClicked(true);
+        });
+      }}
+      className="playButton"
+    >
+      Lets Play
+    </Button>
+  );
+
   return (
     <div className="home-container">
-      {!isLetsPlayClicked && (
-        <Button
-          variant="contained"
-          onClick={() => {
-            // start of the game "Lets Play"
-            NewDeckOfCard().then((res) => {
-              setDeckId(res.data.deck_id);
-              setIsLetsPlayClicked(true);
-            });
-          }}
-          className="playButton"
-        >
-          Lets Play
-        </Button>
-      )}
-
-      {isLetsPlayClicked && (
+      {isLetsPlayClicked ? (
         <div className="players-container" >
           <div className="dealer-container">
             <Dealer
@@ -93,7 +93,7 @@ const Home = () => {
             />
           </div>
         </div>
-      )}
+      ) : renderLetsPlayButton()}
     </div>
   );
 };

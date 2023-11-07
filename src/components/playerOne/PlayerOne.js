@@ -13,14 +13,12 @@ import "react-toastify/dist/ReactToastify.css";
 const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
   // STATES:
   const [player1CardObj, setPlayer1CardObj] = React.useState(player1cards);
-  const [player1CardFaceValues, setPlayer1CardFaceValues] =
-    React.useState(null);
   const [hitCards, setHitCards] = React.useState(null);
   const [score, setScore] = React.useState(null);
   const [player1Result, setPlayer1Result] = React.useState(null);
   const [gameState, setGameState] = React.useState("playing");
-  const { stateObject, updateStateObject  } = useStore();
-
+  const { stateObject, updateStateObject } = useStore();
+  const [player1CardFaceValues, setPlayer1CardFaceValues] = React.useState([]);
 
   const handleIsGameOver = (myBool) => {
     // Update the state object
@@ -32,7 +30,7 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
   };
 
   React.useEffect(() => {
-    if (score >= 21 ) {
+    if (score >= 21) {
       handleIsGameOver(true);
     }
   }, [score]);
@@ -45,9 +43,12 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
   }, [player1cards]);
 
   React.useEffect(() => {
-    if (deckId !== null && player1cards !== null) {
-      const cardVals = player1cards?.map((element) => element.value);
-      setPlayer1CardFaceValues(cardVals);
+    if (deckId !== null && Array.isArray(player1cards)) {
+      const cardVals = player1cards.map((element) => element.value);
+      setPlayer1CardFaceValues((prev) => [
+        ...(prev || []), // Use empty array as default to prevent issues
+        ...cardVals,
+      ]);
     }
   }, [deckId, player1cards]);
 
@@ -65,7 +66,7 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
     }
 
     let result = 0;
-    let aceCount = 0
+    let aceCount = 0;
     player1CardFaceValues.forEach((element) => {
       if (element === "ACE") {
         result += 11;
@@ -77,7 +78,7 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
         result += isNaN(nums) ? 0 : nums;
       }
     });
-    
+
     while (aceCount > 0 && result > 21) {
       result -= 10;
       aceCount -= 1;
@@ -127,15 +128,25 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
           <Stack spacing={2} direction="row">
             <Button
               variant="contained"
-              disabled={score > 21}
+              disabled={stateObject.playerOneStay}
               onClick={() => {
-                drawOneCardFromExistingDeck(deckId).then((res) => {
-                  setPlayer1CardObj((prev) => [...prev, ...res.data.cards]);
-                  setPlayer1CardFaceValues((prev) => [
-                    ...prev,
-                    ...res.data.cards.map((card) => card.value),
-                  ]);
-                });
+                drawOneCardFromExistingDeck(deckId)
+                  .then((res) => {
+                    console.log("Response:", res); // Log the entire response object
+                    if (res.data && res.data.cards) {
+                      console.log("Cards:", res.data.cards); // Log the cards array
+                      setPlayer1CardObj((prev) => [...prev, ...res.data.cards]);
+                      setPlayer1CardFaceValues((prev) => [
+                        ...prev,
+                        ...res.data.cards.map((card) => card.value),
+                      ]);
+                    } else {
+                      console.error("Invalid response structure:", res);
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error fetching card:", error);
+                  });
               }}
             >
               Hit Me
@@ -144,7 +155,7 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
               variant="contained"
               disabled={stateObject.playerOneStay}
               onClick={() => {
-                handleStay(true)
+                handleStay(true);
               }}
             >
               Stay

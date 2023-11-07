@@ -30,10 +30,10 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
   };
 
   React.useEffect(() => {
-    if (score >= 21) {
+    if (score >= 21 && gameState !== "over") {
       handleIsGameOver(true);
     }
-  }, [score]);
+  }, [score, gameState]);
 
   // LifeCycle:
   React.useEffect(() => {
@@ -61,12 +61,13 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
   }, [deckId, hitCards, player1CardFaceValues]);
 
   React.useEffect(() => {
-    if (!player1CardFaceValues || player1CardFaceValues.length === 0) {
+    if (player1CardFaceValues.length === 0 || gameState === "over") {
       return;
     }
-
+  
     let result = 0;
     let aceCount = 0;
+  
     player1CardFaceValues.forEach((element) => {
       if (element === "ACE") {
         result += 11;
@@ -78,13 +79,18 @@ const PlayerOne = ({ deckId, player1cards, player1Details, dealerDetails }) => {
         result += isNaN(nums) ? 0 : nums;
       }
     });
-
+  
     while (aceCount > 0 && result > 21) {
       result -= 10;
       aceCount -= 1;
     }
+  
     setScore(result);
-  }, [player1CardFaceValues, hitCards, player1CardObj]);
+  
+    if (result >= 21) {
+      handleIsGameOver(true);
+    }
+  }, [player1CardFaceValues, gameState]);
 
   // Functions:
 

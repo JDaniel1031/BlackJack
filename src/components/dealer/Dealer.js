@@ -77,21 +77,7 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
     setScore(result);
   }, [dealerCardFaceValues, hitCards]);
 
-  // Functions:
-  // const renderImageList = (cards) => (
-  //   <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
-  //     {cards?.map((item, index) => (
-  //       <ImageListItem key={item.image}>
-  //         <img
-  //           srcSet={`${index === 1 ? 'https://www.deckofcardsapi.com/static/img/back.png' : item.image}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-  //           src={`${index === 1 ? 'https://www.deckofcardsapi.com/static/img/back.png' : item.image}?w=164&h=164&fit=crop&auto=format`}
-  //           alt={item.code}
-  //           loading="lazy"
-  //         />
-  //       </ImageListItem>
-  //     ))}
-  //   </ImageList>
-  // );
+  
   const renderImageList = (cards, showBackImage) => (
     <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
       {cards?.map((item, index) => (
@@ -102,11 +88,6 @@ const Dealer = ({ deckId, player2cards, dealerDetails }) => {
                 ? "https://www.deckofcardsapi.com/static/img/back.png"
                 : item.image
             }?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-            src={`${
-              showBackImage && index === 1
-                ? "https://www.deckofcardsapi.com/static/img/back.png"
-                : item.image
-            }?w=164&h=164&fit=crop&auto=format`}
             alt={item.code}
             loading="lazy"
           />
